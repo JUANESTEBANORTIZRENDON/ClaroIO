@@ -14,31 +14,6 @@ export function chart(id, type, labels, datasets, yTitle, extra={}) {
 const short = value => value.length > 25 ? value.slice(0,24)+'…' : value;
 function line(x1,y1,x2,y2,best=false){return `<path class="connector ${best?'best-line':''}" d="M${x1},${y1} C${(x1+x2)/2},${y1} ${(x1+x2)/2},${y2} ${x2},${y2}"/>`;}
 function node(x,y,w,h,title,subtitle,best=false){return `<g><rect class="node ${best?'chosen':''}" x="${x}" y="${y-h/2}" width="${w}" height="${h}" rx="7"/><text class="node-title" x="${x+12}" y="${y-3}">${esc(title)}</text><text x="${x+12}" y="${y+14}">${esc(subtitle)}</text></g>`;}
-export function decisionTree(result, model, withSignal=false){
- let elements=[], height=withSignal?800:470;
- const rootY=height/2;
- elements.push(node(5,rootY,130,56,withSignal?'Observar señal':'Claro decide',withSignal?`VE = ${fmt(result.signal_value)}`:`VE = ${fmt(Math.max(...result.expected))}`,true));
- if(!withSignal){
-  model.names.forEach((name,i)=>{
-   const y=85+i*150, best=result.winners.includes(i);
-   elements.push(line(135,rootY,215,y,best),node(215,y,230,52,`d${i+1} · ${short(name)}`,`VE = ${fmt(result.expected[i],3)} mM COP`,best));
-   states.forEach((s,j)=>{const sy=y+(j-1)*44;elements.push(line(445,y,570,sy,best),node(570,sy,290,38,`${s} · P = ${pct(model.probabilities[j])}`,`Pago: ${fmt(result.matrix[i][j],3)} mM COP`,false));});
-  });
- }else{
-  result.signals.forEach((signal,s)=>{
-   const y=200+s*390;
-   elements.push(line(135,rootY,165,y),node(165,y,130,54,`Señal ${signal.name}`,`P = ${pct(signal.probability)}`));
-   if(!signal.posterior){elements.push(node(330,y,350,50,'Señal imposible','P = 0; posterior y decisión no definidos.'));return;}
-   model.names.forEach((name,i)=>{
-    const dy=y+(i-1)*120,best=signal.winners.includes(i);
-    elements.push(line(295,y,340,dy,best),node(340,dy,235,48,`d${i+1} · ${short(name)}`,`VE | ${signal.name} = ${fmt(signal.expected[i],3)}`,best));
-    states.forEach((st,j)=>{const sy=dy+(j-1)*36;elements.push(line(575,dy,650,sy,best),node(650,sy,265,32,`${st} · ${pct(signal.posterior[j])}`,`${fmt(result.matrix[i][j],3)} mM COP`));});
-   });
-  });
- }
- return `<div class="tree-scroll"><svg class="decision-tree" viewBox="0 0 ${withSignal?940:890} ${height}" role="img" aria-label="Árbol ${withSignal?'con señal F y D y todas las alternativas':'sin información adicional'}, probabilidades y pagos actuales"><title>Árbol de decisión dinámico. Las ramas rojas y nodos resaltados señalan las decisiones óptimas.</title>${elements.join('')}</svg></div><div class="tree-legend"><span>Decisión óptima: borde y rama resaltados</span><span>Pagos en mM COP</span></div>`;
-}
-
 export function uncertaintyTree(result, model){
  const rootY=235, strategyY=[85,235,385], parts=[];
  parts.push(node(8,rootY,145,58,'Claro decide','Sin probabilidades'));
