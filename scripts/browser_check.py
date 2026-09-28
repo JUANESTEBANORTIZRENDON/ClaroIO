@@ -1,0 +1,155 @@
+"""Run against the live app; inspect mutations, session, errors and responsive layouts."""
+import argparse
+import json
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+
+parser=argparse.ArgumentParser()
+parser.add_argument('--url',default='http://127.0.0.1:8000')
+parser.add_argument('--channel',default='msedge',help='Use chromium to use a Playwright installation.')
+args=parser.parse_args()
+OUT=Path(__file__).resolve().parents[1]/'evidence'
+OUT.mkdir(exist_ok=True)
+checks=[]
+
+def check(name):
+    checks.append(name)
+    print('PASS',name,flush=True)
+
+def wait_result(page,kind='decision'):
+    expect(page.locator(f'#{kind}-results')).to_be_visible()
+    expect(page.locator(f'#{kind}-status')).to_be_empty()
+    expect(page.locator(f'#{kind}-error')).to_be_hidden()
+
+def fill(page,path,value):
+    page.locator(f'[data-path="{path}"]').fill(value)
+
+with sync_playwright() as p:
+    browser=p.chromium.launch(**({} if args.channel=='chromium' else {'channel':args.channel}),headless=True)
+    context=browser.new_context(viewport={'width':1440,'height':1000},locale='es-CO',reduced_motion='reduce')
+    page=context.new_page()
+    errors=[]
+    page.on('pageerror',lambda e: errors.append(str(e)))
+    page.goto(args.url)
+    wait_result(page)
+    expect(page.locator('#decision-summary')).to_contain_text('d1')
+    assert page.locator('.decision-tree').count()==2
+    assert page.locator('canvas').count()==3
+    page.screenshot(path=str(OUT/'desktop-decisions.png'),full_page=False)
+    check('Initial decisions: winner, charts and both trees')
+
+    page.locator('.parameters summary').click()
+    fill(page,'response.0.0','20')
+    wait_result(page)
+    expect(page.locator('#decision-summary h3')).to_contain_text('d1')
+    expect(page.locator('[data-path="matrix.0.0"]')).not_to_have_value('-1,73')
+    check('Parameter edit updates matrix, recommendation and charts')
+    page.locator('[data-mode="direct"]').click()
+    wait_result(page)
+    expect(page.locator('[data-path="matrix.0.0"]')).to_have_value('-1,73')
+    fill(page,'matrix.2.2','100')
+    wait_result(page)
+    expect(page.locator('#decision-summary h3')).to_contain_text('d3')
+    fill(page,'names.2','Continuidad experimental')
+    wait_result(page)
+    expect(page.locator('#decision-summary h3')).to_contain_text('Continuidad experimental')
+    expect(page.locator('#bayes-results')).to_contain_text('Continuidad experimental')
+    assert '100,000' in page.locator('.decision-tree').first.inner_html()
+    check('Direct payments and names update recommendations and tree branches')
+
+    fill(page,'probabilities.0','0,5')
+    expect(page.locator('#decision-error')).to_be_visible()
+    expect(page.locator('#decision-results')).to_be_hidden()
+    expect(page.locator('#bayes-results')).to_be_hidden()
+    check('Invalid probability sum hides every stale result and graph')
+    fill(page,'probabilities.0','0,3125')
+    wait_result(page)
+    fill(page,'matrix.2.2','')
+    expect(page.locator('#decision-error')).to_be_visible()
+    page.locator('[data-mode="parameters"]').click()
+    wait_result(page)
+    expect(page.locator('#decision-summary h3')).to_contain_text('d1')
+    page.locator('[data-mode="direct"]').click()
+    expect(page.locator('#decision-error')).to_be_visible()
+    fill(page,'matrix.2.2','100')
+    wait_result(page)
+    check('Independent editors retain drafts; an inactive invalid draft does not block calculation')
+
+    page.locator('[data-page="juegos"]').click()
+    wait_result(page,'game')
+    expect(page.locator('#game-summary')).to_contain_text('153,62')
+    expect(page.locator('.saddle')).to_have_count(1)
+    page.screenshot(path=str(OUT/'desktop-games.png'),full_page=False)
+    fill(page,'matrix.0.0','90')
+    wait_result(page,'game')
+    expect(page.locator('#game-badge')).to_contain_text('Escenario editado')
+    page.locator('[data-game="hypothetical"]').click()
+    wait_result(page,'game')
+    expect(page.locator('#game-summary')).to_contain_text('253,58')
+    expect(page.locator('#game-results')).to_contain_text('67,982')
+    page.locator('#g-mixed').screenshot(path=str(OUT/'desktop-mixed.png'))
+    fill(page,'matrix.0.0','600')
+    wait_result(page,'game')
+    expect(page.locator('#game-summary')).to_contain_text('estrategias puras')
+    check('Game edits create a saddle and replace mixed explanation automatically')
+    page.locator('[data-game="historical"]').click()
+    wait_result(page,'game')
+    expect(page.locator('[data-path="matrix.0.0"]')).to_have_value('90,00')
+    page.reload();wait_result(page,'game')
+    expect(page.locator('[data-path="matrix.0.0"]')).to_have_value('90,00')
+    page.locator('[data-page="decisiones"]').click();wait_result(page)
+    expect(page.locator('#decision-summary h3')).to_contain_text('Continuidad experimental')
+    check('Decision, historical and hypothetical states persist independently across navigation and reload')
+    page.locator('[data-reset="decisions"]').click();wait_result(page)
+    expect(page.locator('#decision-summary h3')).to_contain_text('d1')
+    for i,v in enumerate(['5','5','6']):
+        fill(page,f'counts.{i}.0',v)
+        fill(page,f'counts.{i}.1','0')
+    wait_result(page)
+    expect(page.locator('#bayes-results')).to_contain_text('señal imposible')
+    check('Impossible signal is explicitly labelled without NaN or infinity')
+    page.locator('[data-reset="decisions"]').click();wait_result(page)
+    page.locator('#tour-toggle').click()
+    expect(page.locator('#tour')).to_be_visible()
+    page.locator('#tour-next').click()
+    expect(page.locator('#tour-title')).to_have_text('De ingresos a pagos')
+    page.keyboard.press('Escape')
+    expect(page.locator('#tour')).to_be_hidden()
+    check('Presentation mode navigates steps and closes by keyboard')
+
+    page.locator('[data-page="juegos"]').click();wait_result(page,'game')
+    for i in range(2):
+        for j in range(2): fill(page,f'matrix.{i}.{j}','2')
+    wait_result(page,'game')
+    expect(page.locator('.saddle')).to_have_count(4)
+    expect(page.locator('#game-summary')).to_contain_text('4 puntos de silla')
+    page.locator('[data-reset="historical"]').click();wait_result(page,'game')
+    page.locator('[data-game="hypothetical"]').click();wait_result(page,'game')
+    page.locator('[data-reset="hypothetical"]').click();wait_result(page,'game')
+    check('All tied saddle points and independent restores are shown')
+
+    page.locator('[data-page="fuentes"]').click()
+    expect(page.locator('.reference-card')).to_have_count(5)
+    expect(page.locator('.reference-link[target="_blank"]')).to_have_count(5)
+    expect(page.locator('.reference-link[rel="noopener noreferrer"]')).to_have_count(5)
+    page.screenshot(path=str(OUT/'desktop-sources.png'),full_page=False)
+    page.locator('[data-page="contexto"]').click()
+    expect(page.locator('.context-profile-stat')).to_contain_text('42.665.092')
+    page.screenshot(path=str(OUT/'desktop-context.png'),full_page=False)
+    check('Institutional references open safely in new tabs and company context is present')
+
+    mobile=browser.new_context(viewport={'width':390,'height':844},locale='es-CO',is_mobile=True,has_touch=True,reduced_motion='reduce')
+    mp=mobile.new_page();mp.on('pageerror',lambda e:errors.append(str(e)));mp.goto(args.url);wait_result(mp)
+    for target in ['decisiones','juegos','fuentes','contexto']:
+        mp.locator(f'[data-page="{target}"]').click()
+        if target in ['decisiones','juegos']:wait_result(mp,'decision' if target=='decisiones' else 'game')
+        assert mp.evaluate('document.documentElement.scrollWidth <= window.innerWidth'),target+' overflows the viewport'
+        mp.screenshot(path=str(OUT/f'mobile-{target}.png'),full_page=True)
+    mp.locator('[data-page="juegos"]').click();wait_result(mp,'game')
+    fill(mp,'matrix.0.0','200');wait_result(mp,'game')
+    expect(mp.locator('#game-badge')).to_contain_text('Escenario editado')
+    check('All four pages render without horizontal page overflow at 390 px; mobile edits work')
+    assert not errors,errors
+    check('No browser JavaScript errors')
+    (OUT/'browser-checks.json').write_text(json.dumps({'checks':checks,'count':len(checks),'browser':'Chromium via '+args.channel,'desktop':[1440,1000],'mobile':[390,844],'console_errors':errors},ensure_ascii=False,indent=2),encoding='utf-8')
+    browser.close()

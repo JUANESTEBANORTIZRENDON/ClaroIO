@@ -1,0 +1,669 @@
+{
+  "version": 1,
+  "period": "2022-T1 a 2025-T4",
+  "decisions": {
+    "mode": "parameters",
+    "names": [
+      "Expansión intensiva",
+      "Retención y red selectiva",
+      "Continuidad con gasto limitado"
+    ],
+    "base": [
+      216.5475978568,
+      281.9016000162,
+      266.4415800551667
+    ],
+    "costs": [
+      1.4,
+      0.6,
+      0.15
+    ],
+    "response": [
+      [
+        0.6,
+        1.2,
+        3.9
+      ],
+      [
+        1.2,
+        1.4,
+        1.3
+      ],
+      [
+        0.35,
+        0.25,
+        0.2
+      ]
+    ],
+    "matrix": [
+      [
+        -1.7323807828543998,
+        -0.5638032000323999,
+        6.661039501379167
+      ],
+      [
+        1.2992855871408,
+        2.2552128001295997,
+        1.865091060386167
+      ],
+      [
+        0.43309519571359995,
+        0.2819016000162,
+        0.13322079002758339
+      ]
+    ],
+    "probabilities": [
+      0.3125,
+      0.3125,
+      0.375
+    ],
+    "counts": [
+      [
+        4,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        2,
+        4
+      ]
+    ],
+    "alpha": 0.5
+  },
+  "games": {
+    "historical": [
+      [
+        153.61766666666665,
+        437.50525
+      ],
+      [
+        123.2206,
+        311.7555
+      ]
+    ],
+    "hypothetical": [
+      [
+        128.7,
+        349.56
+      ],
+      [
+        518.72,
+        49.78
+      ]
+    ]
+  },
+  "history": {
+    "decisions": [
+      {
+        "quarter": "2022-T1",
+        "subscribers": 75991858,
+        "claro_subscribers": 35709820,
+        "growth": 1.2467299298254408,
+        "previous_growth": 2.748589142640423,
+        "state": 0,
+        "signal": "F",
+        "income": 322.97983924
+      },
+      {
+        "quarter": "2022-T2",
+        "subscribers": 77872644,
+        "claro_subscribers": 36321883,
+        "growth": 2.474983569950351,
+        "previous_growth": 1.2467299298254408,
+        "state": 2,
+        "signal": "D",
+        "income": 317.187519863
+      },
+      {
+        "quarter": "2022-T3",
+        "subscribers": 79048957,
+        "claro_subscribers": 36843718,
+        "growth": 1.5105599856093166,
+        "previous_growth": 2.474983569950351,
+        "state": 1,
+        "signal": "F",
+        "income": 301.34081001699997
+      },
+      {
+        "quarter": "2022-T4",
+        "subscribers": 80812165,
+        "claro_subscribers": 37549954,
+        "growth": 2.230526583671444,
+        "previous_growth": 1.5105599856093166,
+        "state": 2,
+        "signal": "D",
+        "income": 311.748109048
+      },
+      {
+        "quarter": "2023-T1",
+        "subscribers": 82171173,
+        "claro_subscribers": 38067851,
+        "growth": 1.6816874043654284,
+        "previous_growth": 2.230526583671444,
+        "state": 1,
+        "signal": "F",
+        "income": 285.182396047
+      },
+      {
+        "quarter": "2023-T2",
+        "subscribers": 83318341,
+        "claro_subscribers": 38423895,
+        "growth": 1.3960711014798344,
+        "previous_growth": 1.6816874043654284,
+        "state": 1,
+        "signal": "F",
+        "income": 281.68886768100003
+      },
+      {
+        "quarter": "2023-T3",
+        "subscribers": 85007852,
+        "claro_subscribers": 38701128,
+        "growth": 2.0277780134868584,
+        "previous_growth": 1.3960711014798344,
+        "state": 2,
+        "signal": "D",
+        "income": 268.39420584000004
+      },
+      {
+        "quarter": "2023-T4",
+        "subscribers": 87365916,
+        "claro_subscribers": 39239608,
+        "growth": 2.7739366946949895,
+        "previous_growth": 2.0277780134868584,
+        "state": 2,
+        "signal": "F",
+        "income": 265.623842282
+      },
+      {
+        "quarter": "2024-T1",
+        "subscribers": 87657606,
+        "claro_subscribers": 39743902,
+        "growth": 0.3338716210564252,
+        "previous_growth": 2.7739366946949895,
+        "state": 0,
+        "signal": "F",
+        "income": 248.30698300699999
+      },
+      {
+        "quarter": "2024-T2",
+        "subscribers": 88978017,
+        "claro_subscribers": 40187192,
+        "growth": 1.5063279277784503,
+        "previous_growth": 0.3338716210564252,
+        "state": 1,
+        "signal": "D",
+        "income": 269.785815714
+      },
+      {
+        "quarter": "2024-T3",
+        "subscribers": 90462185,
+        "claro_subscribers": 40597250,
+        "growth": 1.6680164944561593,
+        "previous_growth": 1.5063279277784503,
+        "state": 1,
+        "signal": "D",
+        "income": 271.510110622
+      },
+      {
+        "quarter": "2024-T4",
+        "subscribers": 92072138,
+        "claro_subscribers": 40952782,
+        "growth": 1.7796972292897895,
+        "previous_growth": 1.6680164944561593,
+        "state": 2,
+        "signal": "F",
+        "income": 277.337207253
+      },
+      {
+        "quarter": "2025-T1",
+        "subscribers": 92471204,
+        "claro_subscribers": 41249588,
+        "growth": 0.4334275370036389,
+        "previous_growth": 1.7796972292897895,
+        "state": 0,
+        "signal": "F",
+        "income": 195.33275549200002
+      },
+      {
+        "quarter": "2025-T2",
+        "subscribers": 92933482,
+        "claro_subscribers": 41677426,
+        "growth": 0.49991562778830545,
+        "previous_growth": 0.4334275370036389,
+        "state": 0,
+        "signal": "D",
+        "income": 154.428298066
+      },
+      {
+        "quarter": "2025-T3",
+        "subscribers": 95796445,
+        "claro_subscribers": 42165436,
+        "growth": 3.080658271256853,
+        "previous_growth": 0.49991562778830545,
+        "state": 2,
+        "signal": "D",
+        "income": 158.358596045
+      },
+      {
+        "quarter": "2025-T4",
+        "subscribers": 95598328,
+        "claro_subscribers": 42665092,
+        "growth": -0.2068103884230732,
+        "previous_growth": 3.080658271256853,
+        "state": 0,
+        "signal": "F",
+        "income": 161.69011347900002
+      }
+    ],
+    "games": [
+      {
+        "quarter": "2022-T1",
+        "claro": {
+          "net": 104069,
+          "received": 681203,
+          "donated": 577134,
+          "threshold": 608805.25,
+          "strategy": 0
+        },
+        "tigo": {
+          "net": 24465,
+          "received": 480447,
+          "donated": 455982,
+          "threshold": 388928,
+          "strategy": 0
+        },
+        "payoff": 79.604
+      },
+      {
+        "quarter": "2022-T2",
+        "claro": {
+          "net": 141046,
+          "received": 708869,
+          "donated": 567823,
+          "threshold": 650608.5,
+          "strategy": 0
+        },
+        "tigo": {
+          "net": -14398,
+          "received": 527098,
+          "donated": 541496,
+          "threshold": 443670.25,
+          "strategy": 0
+        },
+        "payoff": 155.444
+      },
+      {
+        "quarter": "2022-T3",
+        "claro": {
+          "net": -11595,
+          "received": 680879,
+          "donated": 692474,
+          "threshold": 685363.75,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -95818,
+          "received": 530533,
+          "donated": 626351,
+          "threshold": 475853.25,
+          "strategy": 0
+        },
+        "payoff": 84.223
+      },
+      {
+        "quarter": "2022-T4",
+        "claro": {
+          "net": -103459,
+          "received": 681929,
+          "donated": 785388,
+          "threshold": 688532.5,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -153242,
+          "received": 536189,
+          "donated": 689431,
+          "threshold": 495745.75,
+          "strategy": 0
+        },
+        "payoff": 49.783
+      },
+      {
+        "quarter": "2023-T1",
+        "claro": {
+          "net": 16842,
+          "received": 719275,
+          "donated": 702433,
+          "threshold": 688220,
+          "strategy": 0
+        },
+        "tigo": {
+          "net": -208963,
+          "received": 522298,
+          "donated": 731261,
+          "threshold": 518566.75,
+          "strategy": 0
+        },
+        "payoff": 225.805
+      },
+      {
+        "quarter": "2023-T2",
+        "claro": {
+          "net": 34177,
+          "received": 726382,
+          "donated": 692205,
+          "threshold": 697738,
+          "strategy": 0
+        },
+        "tigo": {
+          "net": -254948,
+          "received": 484398,
+          "donated": 739346,
+          "threshold": 529029.5,
+          "strategy": 1
+        },
+        "payoff": 289.125
+      },
+      {
+        "quarter": "2023-T3",
+        "claro": {
+          "net": 111664,
+          "received": 743419,
+          "donated": 631755,
+          "threshold": 702116.25,
+          "strategy": 0
+        },
+        "tigo": {
+          "net": -407052,
+          "received": 386611,
+          "donated": 793663,
+          "threshold": 518354.5,
+          "strategy": 1
+        },
+        "payoff": 518.716
+      },
+      {
+        "quarter": "2023-T4",
+        "claro": {
+          "net": 225812,
+          "received": 815077,
+          "donated": 589265,
+          "threshold": 717751.25,
+          "strategy": 0
+        },
+        "tigo": {
+          "net": -242826,
+          "received": 317359,
+          "donated": 560185,
+          "threshold": 482374,
+          "strategy": 1
+        },
+        "payoff": 468.638
+      },
+      {
+        "quarter": "2024-T1",
+        "claro": {
+          "net": 239248,
+          "received": 713949,
+          "donated": 474701,
+          "threshold": 751038.25,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -110312,
+          "received": 323041,
+          "donated": 433353,
+          "threshold": 427666.5,
+          "strategy": 1
+        },
+        "payoff": 349.56
+      },
+      {
+        "quarter": "2024-T2",
+        "claro": {
+          "net": 129861,
+          "received": 589880,
+          "donated": 460019,
+          "threshold": 749706.75,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -39829,
+          "received": 384977,
+          "donated": 424806,
+          "threshold": 377852.25,
+          "strategy": 0
+        },
+        "payoff": 169.69
+      },
+      {
+        "quarter": "2024-T3",
+        "claro": {
+          "net": 114614,
+          "received": 605102,
+          "donated": 490488,
+          "threshold": 715581.25,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -14090,
+          "received": 421583,
+          "donated": 435673,
+          "threshold": 352997,
+          "strategy": 0
+        },
+        "payoff": 128.704
+      },
+      {
+        "quarter": "2024-T4",
+        "claro": {
+          "net": 93528,
+          "received": 605337,
+          "donated": 511809,
+          "threshold": 681002,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -90175,
+          "received": 385459,
+          "donated": 475634,
+          "threshold": 361740,
+          "strategy": 0
+        },
+        "payoff": 183.703
+      },
+      {
+        "quarter": "2025-T1",
+        "claro": {
+          "net": 125963,
+          "received": 613457,
+          "donated": 487494,
+          "threshold": 628567,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -91225,
+          "received": 368390,
+          "donated": 459615,
+          "threshold": 378765,
+          "strategy": 1
+        },
+        "payoff": 217.188
+      },
+      {
+        "quarter": "2025-T2",
+        "claro": {
+          "net": 122982,
+          "received": 587199,
+          "donated": 464217,
+          "threshold": 603444,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -175864,
+          "received": 332717,
+          "donated": 508581,
+          "threshold": 390102.25,
+          "strategy": 1
+        },
+        "payoff": 298.846
+      },
+      {
+        "quarter": "2025-T3",
+        "claro": {
+          "net": 134823,
+          "received": 601431,
+          "donated": 466608,
+          "threshold": 602773.75,
+          "strategy": 1
+        },
+        "tigo": {
+          "net": -246605,
+          "received": 330527,
+          "donated": 577132,
+          "threshold": 377037.25,
+          "strategy": 1
+        },
+        "payoff": 381.428
+      },
+      {
+        "quarter": "2025-T4",
+        "claro": {
+          "net": 191721,
+          "received": 622447,
+          "donated": 430726,
+          "threshold": 601856,
+          "strategy": 0
+        },
+        "tigo": {
+          "net": -281821,
+          "received": 317883,
+          "donated": 599704,
+          "threshold": 354273.25,
+          "strategy": 1
+        },
+        "payoff": 473.542
+      }
+    ],
+    "groups": [
+      [
+        {
+          "n": 3,
+          "quarters": [
+            "2022-T1",
+            "2022-T2",
+            "2023-T1"
+          ],
+          "payoff": 153.61766666666665,
+          "claro_net": 87.319,
+          "tigo_net": -66.29866666666668
+        },
+        {
+          "n": 4,
+          "quarters": [
+            "2023-T2",
+            "2023-T3",
+            "2023-T4",
+            "2025-T4"
+          ],
+          "payoff": 437.50525,
+          "claro_net": 140.8435,
+          "tigo_net": -296.66175
+        }
+      ],
+      [
+        {
+          "n": 5,
+          "quarters": [
+            "2022-T3",
+            "2022-T4",
+            "2024-T2",
+            "2024-T3",
+            "2024-T4"
+          ],
+          "payoff": 123.2206,
+          "claro_net": 44.589800000000004,
+          "tigo_net": -78.63080000000001
+        },
+        {
+          "n": 4,
+          "quarters": [
+            "2024-T1",
+            "2025-T1",
+            "2025-T2",
+            "2025-T3"
+          ],
+          "payoff": 311.7555,
+          "claro_net": 155.754,
+          "tigo_net": -156.0015
+        }
+      ]
+    ],
+    "signal_threshold": 1.589288240032738,
+    "state_upper_bounds": [
+      1.2467299298254408,
+      1.6816874043654284
+    ],
+    "claro_subscribers_2025q4": 42665092
+  },
+  "sources": [
+    {
+      "name": "Operaciones_Portación_Donante_6.csv",
+      "sha256": "77654f645da4e9ab0482dcb0d9e6df0b58a000cc1d68856972781e4c3662969d",
+      "bytes": 161502
+    },
+    {
+      "name": "Operaciones_Portación_Receptor_6.csv",
+      "sha256": "d78204c03dba81471345b377008d2d58dbc8d327feda6b66c474f6f711f02c8e",
+      "bytes": 161730
+    },
+    {
+      "name": "PNM_RECEPTOR_NETO_6.csv",
+      "sha256": "6fda930d43d11659e61ff4284f254a773f75d8c735d31e24de2805d654d7fddc",
+      "bytes": 161085
+    },
+    {
+      "name": "Sustento-Teoria-Decisiones-Claro-Origen-Datos-y-Operaciones.docx",
+      "sha256": "0b8520eaeca52b8ef1a17e5104edac737c90a658974e985aa55d82f1650998a4",
+      "bytes": 44203
+    },
+    {
+      "name": "Sustento-Teoria-Juegos-Claro-Tigo-Origen-Datos-y-Operaciones.docx",
+      "sha256": "06f84ea622ef2ed7ff1773069f90a288a207cbaf0ba79c9fbff0aa9078589846",
+      "bytes": 44629
+    },
+    {
+      "name": "Taller-Decisiones-Claro.docx",
+      "sha256": "0ab860b1776533660cf05b960886a7022ae3b253b987b0e45078b4b8d2911471",
+      "bytes": 352047
+    },
+    {
+      "name": "Teoria de juegos .xlsx",
+      "sha256": "15fb7525d4b7b95a8518dc84c6f0d06788809e0cfd405e5dfdcf2e13b08020de",
+      "bytes": 93252
+    },
+    {
+      "name": "Teoria-Decisiones-Claro.xlsx",
+      "sha256": "9f8d0639b90b687ed170139c35d51a2122f24d174d2feb3c9cc38672a46d47e5",
+      "bytes": 149374
+    },
+    {
+      "name": "Teoria-Juegos-Claro-Tigo.docx",
+      "sha256": "0937a09ec0b1d25000c2968076a8a5f672bc02fa8bfde927ac143d408de88cd2",
+      "bytes": 171283
+    },
+    {
+      "name": "VOZ_MOVIL_ABONADOS_1.csv",
+      "sha256": "7981597d9ebce3aface9290906b4d66e43f0e08c40c46fbda4a3f3e8a07764a3",
+      "bytes": 71620
+    },
+    {
+      "name": "VOZ_MOVIL_INGRESOS_1.csv",
+      "sha256": "b43661e40e35270a0511a3c92ecfc219c01a26e1164d8ddcbce50ba6f5ff9fd6",
+      "bytes": 155018
+    }
+  ]
+}

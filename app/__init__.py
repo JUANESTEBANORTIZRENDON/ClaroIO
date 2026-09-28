@@ -1,0 +1,1 @@
+"""Claro IO educational application."""

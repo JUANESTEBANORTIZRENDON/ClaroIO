@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#da292e">
+  <meta name="description" content="Laboratorio académico interactivo de teoría de decisiones y teoría de juegos, basado en el caso Claro Colombia.">
+  <title>Claro laboratorio IO</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='14' fill='%23da292e'/%3E%3Ctext x='24' y='33' text-anchor='middle' fill='white' font-family='Arial' font-size='28'%3EC%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="/static/vendor/chart.umd.js"></script>
+  <script type="module" src="/static/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Ir al contenido</a>
+  <aside class="sidebar">
+    <a class="brand" href="#decisiones" aria-label="Claro laboratorio IO inicio"><span class="brand-mark">C<span>↗</span></span><span>Claro<span class="brand-io"> laboratorio IO</span><small>LABORATORIO ACADÉMICO</small></span></a>
+    <div class="nav-caption">ESPACIO DE EXPLORACIÓN</div>
+    <nav aria-label="Navegación principal">
+      <button class="nav-item" data-page="contexto"><span class="nav-icon">◉</span><span>Claro y su contexto<small>El caso empresarial</small></span><span class="nav-arrow">›</span></button>
+      <button class="nav-item active" data-page="decisiones"><span class="nav-icon">⌘</span><span>Teoría de decisiones<small>Con y sin incertidumbre</small></span><span class="nav-arrow">›</span></button>
+      <button class="nav-item" data-page="juegos"><span class="nav-icon">⇄</span><span>Teoría de juegos<small>Claro frente a Tigo</small></span><span class="nav-arrow">›</span></button>
+      <button class="nav-item" data-page="fuentes"><span class="nav-icon">▤</span><span>Referencias y fuentes<small>Fuentes y metodología</small></span><span class="nav-arrow">›</span></button>
+    </nav>
+    <div class="sidebar-bottom"><div class="edition">CUADERNO DE INVESTIGACIÓN <span>01</span></div><p>Datos reales.<br>Preguntas para experimentar.</p><div class="period-dot">2022 — 2025 <span>16 trimestres</span></div><small>Investigación de Operaciones<br>Ingeniería Informática</small></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><div>Investigación de Operaciones <span>/</span> <strong id="breadcrumb">Teoría de decisiones</strong></div><div class="top-actions"><span class="session-indicator"><i></i> Sesión local</span><button id="tour-toggle" class="button small">▷ <span>Modo exposición</span></button></div></header>
+    <main id="main" tabindex="-1"><div class="loading-screen">Preparando el laboratorio…</div></main>
+    <footer>Claro laboratorio IO <span>Ejercicio académico · No representa decisiones oficiales de los operadores.</span><a href="#fuentes">Consultar fuentes ↗</a></footer>
+  </div>
+  <div id="tour" class="tour" hidden><div><span id="tour-count"></span><strong id="tour-title"></strong><p id="tour-copy"></p></div><div class="tour-buttons"><button id="tour-prev" class="button">← Anterior</button><button id="tour-next" class="button primary">Siguiente →</button><button id="tour-close" class="button" aria-label="Cerrar exposición">×</button></div></div>
+  <div id="toast" role="status" class="toast" hidden></div>
+  <noscript>Esta aplicación necesita JavaScript para editar las matrices y mostrar los cálculos.</noscript>
+</body>
+</html>
