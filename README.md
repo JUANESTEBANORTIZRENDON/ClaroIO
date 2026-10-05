@@ -1,6 +1,6 @@
 # Claro Laboratorio IO
 
-Aplicación académica de Investigación de Operaciones aplicada a Claro Colombia. Integra modelos de teoría de decisiones y teoría de juegos frente a Tigo en una interfaz web interactiva, con cálculos reproducibles, gráficas dinámicas y trazabilidad de los datos utilizados.
+Aplicación académica de Investigación de Operaciones aplicada a Claro Colombia. Integra modelos de teoría de decisiones, teoría de juegos frente a Tigo y teoría de colas M/M/c en una interfaz web interactiva, con cálculos reproducibles, gráficas dinámicas y trazabilidad de los datos utilizados.
 
 ## Descripción
 
@@ -19,8 +19,11 @@ Los resultados tienen finalidad académica. Las estrategias proxy, clasificacion
 - Cálculo de maximin, minimax, dominancia, puntos de silla y valor del juego.
 - Escenario didáctico de estrategias mixtas con probabilidades p y q, curvas de indiferencia y valor del juego.
 - Edición independiente de matrices histórica e hipotética.
+- Laboratorio M/M/c con Erlang C, nivel de servicio, sensibilidad para c=2…5 y rechazo de escenarios sin estado estable.
+- Carga local de CSV de quejas, filtro fijo Claro/Telefonía móvil/Línea Telefónica, agregación mensual, cuantiles lineales y bitácora de cobertura.
+- Exportación JSON de parámetros, operaciones, resultados, filtros, etiquetas, advertencias y fuentes de la ejecución de colas.
 - Trazabilidad de los trimestres, grupos observados y supuestos de clasificación.
-- Referencias institucionales externas y metodología reproducible.
+- Referencias institucionales externas, catálogo de colas F1–F9 y metodología reproducible.
 
 ## Tecnologías
 
@@ -40,7 +43,7 @@ ClaroIO/
 │   ├── main.py              # Entrada de FastAPI
 │   ├── models.py            # Modelos y validación Pydantic
 │   ├── routes.py            # Endpoints de la API
-│   ├── services.py          # Cálculos de decisiones y juegos
+│   ├── services.py          # Cálculos de decisiones, juegos, M/M/c y adaptación CSV
 │   └── static/              # HTML, CSS, JavaScript y Chart.js
 ├── data/initial.json        # Datos procesados y valores iniciales
 ├── scripts/browser_check.py # Pruebas de interfaz con Playwright
@@ -92,14 +95,14 @@ Las pruebas de cálculo y API se ejecutan con:
 python -m pytest -q
 ```
 
-El conjunto actual contiene 24 pruebas. Con el servidor ejecutándose y Playwright instalado, la revisión de interfaz se ejecuta con:
+El conjunto actual contiene 38 pruebas. Con el servidor ejecutándose y Playwright instalado, la revisión de interfaz se ejecuta con:
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
 python scripts/browser_check.py
 ```
 
-La revisión cubre escritorio, móvil, edición de escenarios, navegación, gráficas, validaciones y ausencia de errores JavaScript.
+La revisión cubre escritorio, móvil, edición de escenarios, navegación, gráficas, CSV de colas, validaciones y ausencia de errores JavaScript.
 
 ## Fuentes de datos
 

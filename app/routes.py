@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
-from app.models import DecisionsInput, GameInput
+from app.models import DecisionsInput, GameInput, QueueCsvInput, QueueInput
 from app import services
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,3 +27,23 @@ def calculate_game(payload: GameInput):
         return services.game(payload)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
+
+@router.post('/queues/mmc/calculate')
+def calculate_queue(payload: QueueInput):
+    try:
+        result = services.mmc(payload)
+        result['sensitivity'] = services.queue_sensitivity(payload)
+        return result
+    except services.QueueValidationError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+@router.post('/queues/context/parse')
+def parse_queue_context(payload: QueueCsvInput):
+    try:
+        return services.parse_queue_csv(payload.csv_text, payload.hours_per_day)
+    except services.QueueValidationError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+@router.get('/queues/sources')
+def queue_sources():
+    return DATA.get('queue_sources', [])

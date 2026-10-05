@@ -2,10 +2,11 @@ import {fmt,esc,clearCharts} from './visuals.js';
 import {decisionsPage,renderDecisionResults,badge} from './decisions.js';
 import {gamePage,renderGameResults} from './games.js';
 import {sourcesPage,contextPage,drawContext} from './references.js';
+import {queuePage,renderQueueResults,renderQueueData} from './queues.js';
 
-const labels={decisiones:'Teoría de decisiones',juegos:'Teoría de juegos',fuentes:'Referencias y fuentes',contexto:'Claro y contexto empresarial'};
+const labels={decisiones:'Teoría de decisiones',juegos:'Teoría de juegos',colas:'Teoría de colas',fuentes:'Referencias y fuentes',contexto:'Claro y contexto empresarial'};
 const key='claro-io-session-v1';
-let initial,state,page='decisiones',requestVersion=0,controller,timer,lastDecision,tourIndex=0,tourActive=false;
+let initial,state,page='decisiones',requestVersion=0,controller,timer,lastDecision,lastQueue,queueContext,queueCsvText,tourIndex=0,tourActive=false;
 const clone=x=>structuredClone(x);
 const $=id=>document.getElementById(id);
 const getPath=(obj,path)=>path.split('.').reduce((a,k)=>a?.[k],obj);
@@ -13,11 +14,12 @@ function setPath(obj,path,value){const parts=path.split('.');let target=obj;for(
 function save(){try{sessionStorage.setItem(key,JSON.stringify(state));}catch{toast('El navegador no permite guardar la sesión. Puedes continuar en esta página.');}}
 function toast(text){$('toast').textContent=text;$('toast').hidden=false;setTimeout(()=>$('toast').hidden=true,3500);}
 function loadState(){
- const fresh={version:1,decisions:clone(initial.decisions),games:clone(initial.games),gameKind:'historical'};
+ const fresh={version:1,decisions:clone(initial.decisions),games:clone(initial.games),gameKind:'historical',queue:clone(initial.queue)};
  try{
   const saved=JSON.parse(sessionStorage.getItem(key));
   if(saved?.version===1&&saved.decisions?.matrix?.length===3&&saved.decisions?.names?.length===3&&saved.decisions?.response?.length===3&&saved.decisions?.counts?.length===3&&saved.decisions?.probabilities?.length===3&&saved.decisions?.base?.length===3&&saved.decisions?.costs?.length===3&&['direct','parameters'].includes(saved.decisions.mode)&&saved.games?.historical?.length===2&&saved.games?.hypothetical?.length===2){
    fresh.decisions=saved.decisions;fresh.games=saved.games;fresh.gameKind=['historical','hypothetical'].includes(saved.gameKind)?saved.gameKind:'historical';
+   if(saved.queue)fresh.queue={...fresh.queue,...saved.queue,scenarios:clone(initial.queue.scenarios)};
   }
  }catch{ /* Corrupt or disabled storage never prevents loading the original case. */ }
  return fresh;
@@ -80,17 +82,45 @@ async function calculate(){
  }catch(error){if(error.name!=='AbortError'&&version===requestVersion)showError(prefix,error instanceof TypeError?'No se pudo contactar al servidor. Los resultados se ocultan hasta recuperar el cálculo.':error.message);}
 }
 function showError(prefix,message){$(prefix+'-status').innerHTML='';$(prefix+'-error').textContent=message;$(prefix+'-error').hidden=false;$(prefix+'-results').hidden=true;$(prefix+'-summary').innerHTML='<div class="pending">Resultado pendiente de entradas válidas.</div>';if(prefix==='decision'){$('bayes-results').hidden=true;$('probability-results')?.setAttribute('hidden','');}clearCharts();}
+async function calculateQueue(){
+ const version=++requestVersion,payload={arrival_rate_per_hour:Number(state.queue.arrival_rate_per_hour),average_service_minutes:Number(state.queue.average_service_minutes),servers:Number(state.queue.servers),threshold_seconds:Number(state.queue.threshold_seconds),arrival_evidence:state.queue.mode==='public'&&queueContext?'calculated_from_crc':'estimated'};
+ const numeric=Object.values(payload).filter(v=>typeof v==='number'),valid=numeric.every(Number.isFinite)&&payload.arrival_rate_per_hour>0&&payload.average_service_minutes>0&&Number.isInteger(payload.servers)&&payload.servers>0&&payload.threshold_seconds>=0;
+ if(!valid){$('queue-error').textContent='Revisa las entradas: λ y servicio deben ser positivos, c debe ser entero positivo y el umbral no puede ser negativo.';$('queue-error').hidden=false;$('queue-results').innerHTML='';return;}
+ controller=new AbortController();$('queue-error').hidden=true;$('queue-status').innerHTML='<div class="pending">Calculando M/M/c…</div>';
+ try{
+  const response=await fetch('/api/queues/mmc/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
+  const data=await response.json();if(version!==requestVersion)return;
+  if(!response.ok)throw new Error(Array.isArray(data.detail)?data.detail.map(e=>e.message).join(' · '):data.detail);
+  lastQueue=data;$('queue-status').innerHTML='';$('queue-error').hidden=true;clearCharts();renderQueueResults(data);if(tourActive)updateTour(false);
+ }catch(error){if(error.name!=='AbortError'&&version===requestVersion){lastQueue=null;clearCharts();$('queue-status').innerHTML='';$('queue-error').textContent=error.message;$('queue-error').hidden=false;$('queue-results').innerHTML='<div class="pending">No hay métricas estacionarias para mostrar.</div>';$('queue-export').disabled=true;}}
+}
+async function parseQueueCsv(existingText=null){
+ const file=$('queue-csv')?.files?.[0];if(!existingText&&!file){toast('Selecciona primero un archivo CSV.');return;}
+ const button=$('queue-parse');button.disabled=true;$('queue-status').innerHTML='<div class="pending">Validando y agregando el CSV…</div>';
+ try{
+  const csv_text=existingText??await file.text();queueCsvText=csv_text;
+  const response=await fetch('/api/queues/context/parse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csv_text,hours_per_day:Number(state.queue.hours_per_day)})});
+  const data=await response.json();if(!response.ok)throw new Error(Array.isArray(data.detail)?data.detail.map(e=>e.message).join(' · '):data.detail);
+  queueContext=data;state.queue.arrival_rate_per_hour=data.quantiles.p50;save();renderPage(false);toast('CSV procesado: la demanda base ahora usa P50.');
+ }catch(error){$('queue-status').innerHTML='';$('queue-error').textContent=error.message;$('queue-error').hidden=false;button.disabled=false;}
+}
+function exportQueue(){
+ if(!lastQueue)return;
+ const payload={generated_at:new Date().toISOString(),scope:{provider_id:800153993,service_id:2,channel_id:2,period:'2022-01 a 2025-12',typologies:'Todas'},mode:state.queue.mode,calibration:queueContext,run:lastQueue,sources:initial.queue_sources};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='claro-mmc-resumen.json';link.click();URL.revokeObjectURL(url);
+}
 function renderPage(scroll=true){
  controller?.abort();requestVersion++;clearTimeout(timer);clearCharts();lastDecision=null;
  document.querySelectorAll('[data-page]').forEach(button=>{button.classList.toggle('active',button.dataset.page===page);button.setAttribute('aria-current',button.dataset.page===page?'page':'false');});
  $('breadcrumb').textContent=labels[page];document.title=`${labels[page]} · Claro laboratorio IO`;
- $('main').innerHTML=page==='decisiones'?decisionsPage(state.decisions,initial):page==='juegos'?gamePage(state.games[state.gameKind],state.gameKind,initial):page==='fuentes'?sourcesPage(initial):contextPage(initial);
- if(page==='decisiones'||page==='juegos'){markEdited();invalidate();calculate();}else if(page==='contexto')drawContext(initial);
+ $('main').innerHTML=page==='decisiones'?decisionsPage(state.decisions,initial):page==='juegos'?gamePage(state.games[state.gameKind],state.gameKind,initial):page==='colas'?queuePage(state.queue,initial,queueContext):page==='fuentes'?sourcesPage(initial):contextPage(initial);
+ if(page==='decisiones'||page==='juegos'){markEdited();invalidate();calculate();}else if(page==='colas'){if(queueContext)renderQueueData(queueContext);calculateQueue();}else if(page==='contexto')drawContext(initial);
  if(scroll)window.scrollTo({top:0,behavior:'instant'});
  if(tourActive){tourIndex=0;updateTour();}
 }
 function navigate(next){if(!labels[next])return;page=next;renderPage();}
 document.addEventListener('input',event=>{
+ const queueInput=event.target.closest('[data-queue-path]');if(queueInput){state.queue[queueInput.dataset.queuePath]=Number(queueInput.value);save();controller?.abort();clearTimeout(timer);timer=setTimeout(()=>queueInput.dataset.queuePath==='hours_per_day'&&queueCsvText?parseQueueCsv(queueCsvText):calculateQueue(),180);return;}
  const input=event.target;if(!input.matches('[data-path]'))return;
  const isDecision=page==='decisiones',source=isDecision?state.decisions:{matrix:state.games[state.gameKind]};
  let value=input.value;
@@ -102,6 +132,10 @@ document.addEventListener('click',event=>{
  const nav=event.target.closest('[data-page]');if(nav){const target=nav.dataset.page;if(location.hash==='#'+target)navigate(target);else location.hash=target;return;}
  const mode=event.target.closest('[data-mode]');if(mode){state.decisions.mode=mode.dataset.mode;save();renderPage(false);return;}
  const game=event.target.closest('[data-game]');if(game){state.gameKind=game.dataset.game;save();renderPage(false);return;}
+ const queueMode=event.target.closest('[data-queue-mode]');if(queueMode){state.queue.mode=queueMode.dataset.queueMode;save();renderPage(false);return;}
+ const queueScenario=event.target.closest('[data-queue-scenario]');if(queueScenario){const i=Number(queueScenario.dataset.queueScenario),scenario=queueContext?[{arrival_rate_per_hour:queueContext.quantiles.p25},{arrival_rate_per_hour:queueContext.quantiles.p50},{arrival_rate_per_hour:queueContext.quantiles.p75}][i]:initial.queue.scenarios[i];if(scenario){state.queue.arrival_rate_per_hour=scenario.arrival_rate_per_hour;if(scenario.average_service_minutes)state.queue.average_service_minutes=scenario.average_service_minutes;if(scenario.servers)state.queue.servers=scenario.servers;save();renderPage(false);}return;}
+ if(event.target.closest('#queue-parse')){parseQueueCsv();return;}
+ if(event.target.closest('#queue-export')){exportQueue();return;}
  const reset=event.target.closest('[data-reset]');if(reset){const which=reset.dataset.reset;if(which==='decisions')state.decisions=clone(initial.decisions);else state.games[which]=clone(initial.games[which]);save();renderPage(false);toast('Se restauraron los valores originales de este bloque.');return;}
  if(event.target.closest('#counts-priors')){
   const counts=state.decisions.counts;if(counts.flat().some(v=>!Number.isInteger(v)||v<0)||counts.some(row=>row.reduce((a,b)=>a+b,0)===0)){toast('Primero introduce conteos enteros válidos por estado.');return;}
@@ -113,6 +147,7 @@ window.addEventListener('hashchange',()=>{const next=location.hash.slice(1);if(l
 const tourSteps={
  decisiones:[['d-context','El problema','Claro elige entre tres alternativas; la demanda es incierta.'],['d-matrix','De ingresos a pagos','Distingue el ingreso observado de los porcentajes supuestos. Puedes editar mientras expones.'],['d-criteria','No hay un criterio universal','Compara el criterio optimista (Maximax), el pesimista (Maximin) y mínimo arrepentimiento máximo (Savage). El taller adopta este último.'],['d-risk','Ahora conocemos probabilidades','Explica el valor esperado, el arrepentimiento y el límite de información perfecta.'],['d-counts','Una señal del pasado','F/D describe el crecimiento previo. Cambia los conteos para experimentar.'],['d-bayes','Actualiza y decide de nuevo','Bayes produce decisiones condicionadas y el valor de la señal.'],['d-history','Cierra con evidencia','Consulta los trimestres y las limitaciones de los supuestos.']],
  juegos:[['g-context','Dos jugadores, un índice','Claro maximiza y Tigo minimiza. La unidad es miles de líneas relativas.'],['g-matrix','Distingue ambos escenarios','La matriz histórica y la hipotética conservan entradas independientes.'],['g-equilibrium','Encuentra el punto de silla','Busca el mínimo de fila que también es máximo de columna; revisa la dominancia.'],['g-mixed','Puras o mixtas según la matriz','Si no hay punto de silla, la mezcla iguala las opciones del rival.'],['g-history','Vuelve a los trimestres','Las etiquetas provienen de promedios móviles propios, no de campañas identificadas.']],
+ colas:[['q-scope','Un grupo fijo','El modelo no mezcla operadores, servicios ni canales.'],['q-input','Entradas trazables','Distingue parámetros estimados de datos CRC agregados y resultados calculados.'],['q-results','Erlang C','Revisa utilización, espera y nivel de servicio junto con cada sustitución.'],['q-sensitivity','Sensibilidad','Compara c=2…5 sin convertir el resultado en una recomendación económica.'],['q-trace','Supuestos y fuentes','Cierra con límites, catálogo compartido y exportación.']],
  fuentes:[['s-process','La cadena de evidencia','Distingue dato, clasificación, supuesto y resultado.'],['s-sources','Fuentes descargables','Cada archivo explica campos, transformación, periodo y resultado.'],['s-precision','Redondear solo al presentar','Compara Excel y reconstrucción sin ocultar diferencias.'],['s-limits','Alcance de los resultados','Son ejercicios dentro de muestra; no prueban causalidad ni predicción externa.']],
  contexto:[['c-company','El operador y sus registros','Abonados son suscripciones, no personas únicas.'],['c-market','Dos preguntas de investigación','Demanda y competencia se representan con modelos distintos.'],['c-boundaries','Qué se puede afirmar','Expón el resultado junto con sus supuestos y límites.']]
 };

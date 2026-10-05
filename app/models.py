@@ -35,3 +35,22 @@ class DecisionsInput(BaseModel):
 class GameInput(BaseModel):
     model_config = ConfigDict(extra='forbid')
     matrix: tuple[tuple[Number, Number], tuple[Number, Number]]
+
+
+class QueueInput(BaseModel):
+    """Validated M/M/c parameters. Units are explicit in the field names."""
+
+    model_config = ConfigDict(extra='forbid')
+    arrival_rate_per_hour: Annotated[float, Field(allow_inf_nan=False, gt=0, le=1e7)]
+    average_service_minutes: Annotated[float, Field(allow_inf_nan=False, gt=0, le=1e5)]
+    servers: Annotated[int, Field(strict=True, gt=0, le=100_000)]
+    threshold_seconds: Annotated[float, Field(allow_inf_nan=False, ge=0, le=1e7)]
+    arrival_evidence: Literal['estimated', 'calculated_from_crc'] = 'estimated'
+
+
+class QueueCsvInput(BaseModel):
+    """A text-only upload contract; the adapter never persists the supplied CSV."""
+
+    model_config = ConfigDict(extra='forbid')
+    csv_text: Annotated[str, Field(min_length=1, max_length=10_000_000)]
+    hours_per_day: Annotated[float, Field(allow_inf_nan=False, gt=0, le=24)] = 19

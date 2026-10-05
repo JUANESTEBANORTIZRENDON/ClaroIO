@@ -1,6 +1,31 @@
 {
   "version": 1,
   "period": "2022-T1 a 2025-T4",
+  "queue": {
+    "mode": "manual",
+    "arrival_rate_per_hour": 8,
+    "average_service_minutes": 8,
+    "servers": 3,
+    "threshold_seconds": 30,
+    "hours_per_day": 19,
+    "scenarios": [
+      {"name": "Bajo", "arrival_rate_per_hour": 5, "average_service_minutes": 6, "servers": 3, "kind": "Estimado"},
+      {"name": "Base", "arrival_rate_per_hour": 8, "average_service_minutes": 8, "servers": 3, "kind": "Estimado"},
+      {"name": "Alto", "arrival_rate_per_hour": 12, "average_service_minutes": 10, "servers": 3, "kind": "Estimado"},
+      {"name": "Límite", "arrival_rate_per_hour": 18, "average_service_minutes": 10, "servers": 3, "kind": "Estimado · prueba de rechazo"}
+    ]
+  },
+  "queue_sources": [
+    {"code":"F1","entity":"Comisión de Regulación de Comunicaciones","title":"Quejas de Servicios de Comunicaciones","url":"https://www.postdata.gov.co/dataset/quejas-de-servicios-de-comunicaciones","citation":"Comisión de Regulación de Comunicaciones. (s. f.). Quejas de Servicios de Comunicaciones.","extracted":"Estructura general y registros públicos de quejas.","operation":"Validación del origen y trazabilidad del agregado mensual Qm.","limitation":"No publica llegadas intradía, AHT, turnos ni espera individual."},
+    {"code":"F2","entity":"Comisión de Regulación de Comunicaciones","title":"Quejas de Telefonía e Internet móvil","url":"https://www.postdata.gov.co/resource/quejas-de-telefonia-e-internet-movil","citation":"Comisión de Regulación de Comunicaciones. (s. f.). Quejas de Telefonía e Internet móvil.","extracted":"Diccionario, campos de empresa, servicio, canal, periodo, tipología y quejas.","operation":"Filtro exclusivo y suma de NUMERO_QUEJAS por mes.","limitation":"PQR no equivale a todas las llamadas ni describe el enrutamiento real."},
+    {"code":"F3","entity":"Comisión de Regulación de Comunicaciones","title":"Formato T 4 2 Monitoreo de quejas","url":"https://www.crcom.gov.co/es/micrositios/reportes-informacion/lista-de-formatos/formato/17162","citation":"Comisión de Regulación de Comunicaciones. (2026). Formato T 4 2 Monitoreo de quejas.","extracted":"Cambio regulatorio de estructura a partir de 2026.","operation":"Barrera de homologación: no combinar 2026 con 2022–2025.","limitation":"No homologa automáticamente las versiones del formato."},
+    {"code":"F4","entity":"Comisión de Regulación de Comunicaciones","title":"Compilación de la Resolución CRC 5050 de 2016","url":"https://normograma.crcom.gov.co/crc/compilacion/docs/resolucion_crc_5050_2016.htm","citation":"Comisión de Regulación de Comunicaciones. (s. f.). Compilación de la Resolución CRC 5050 de 2016.","extracted":"Contexto normativo de horarios e indicadores de atención.","operation":"Sustento del horizonte de exposición; Hm sigue siendo un supuesto editable.","limitation":"No entrega el horario efectivo, dotación ni AHT del grupo modelado."},
+    {"code":"F5","entity":"Comisión de Regulación de Comunicaciones","title":"Abonados ingresos y tráfico de telefonía móvil","url":"https://www.postdata.gov.co/dataset/abonados-ingresos-y-trafico-de-telefonia-movil","citation":"Comisión de Regulación de Comunicaciones. (s. f.). Abonados, ingresos y tráfico de telefonía móvil.","extracted":"Contexto agregado del mercado móvil.","operation":"Contexto empresarial únicamente; no interviene en Erlang C.","limitation":"Los abonados no miden demanda de la cola de PQR."},
+    {"code":"F6","entity":"Claro Colombia","title":"Procedimiento y trámite de PQR Claro","url":"https://www.claro.com.co/personas/legal-y-regulatorio/procedimiento-y-tramite-de-peticiones/","citation":"Claro Colombia. (s. f.). Procedimiento y trámite de PQR Claro.","extracted":"Descripción pública de recepción y trámite de PQR.","operation":"Contextualización del proceso de atención.","limitation":"No publica distribución de servicio, dotación ni tiempos de esta cola lógica."},
+    {"code":"F7","entity":"Claro Colombia","title":"Canal de atención IVR","url":"https://www.claro.com.co/personas/autogestion/ivr/","citation":"Claro Colombia. (s. f.). Canal de atención IVR.","extracted":"Descripción pública del canal telefónico IVR.","operation":"Contextualización del canal Línea Telefónica.","limitation":"No demuestra una cola común ni asesores equivalentes."},
+    {"code":"F8","entity":"Massachusetts Institute of Technology","title":"Queuing Models lecture","url":"https://web.mit.edu/1.041/www/lectures/L8-queuing-models-2026sp.pdf","citation":"Massachusetts Institute of Technology. (s. f.). Queuing Models lecture.","extracted":"Supuestos y relaciones de modelos de colas.","operation":"Fundamento conceptual de M/M/c, estabilidad y Ley de Little.","limitation":"Teoría general; no aporta parámetros observados de Claro."},
+    {"code":"F9","entity":"Massachusetts Institute of Technology","title":"Data Networks Queueing Theory","url":"https://web.mit.edu/dimitrib/www/Queueing_Data_Nets.pdf","citation":"Massachusetts Institute of Technology. (s. f.). Data Networks Queueing Theory.","extracted":"Teoría de colas y fórmulas de espera.","operation":"Fundamento de Erlang C y métricas estacionarias.","limitation":"Teoría general; no valida Poisson, exponencial o FCFS para este grupo."}
+  ],
   "decisions": {
     "mode": "parameters",
     "names": [
