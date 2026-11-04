@@ -26,6 +26,93 @@
     {"code":"F8","entity":"Massachusetts Institute of Technology","title":"Queuing Models lecture","url":"https://web.mit.edu/1.041/www/lectures/L8-queuing-models-2026sp.pdf","citation":"Massachusetts Institute of Technology. (s. f.). Queuing Models lecture.","extracted":"Supuestos y relaciones de modelos de colas.","operation":"Fundamento conceptual de M/M/c, estabilidad y Ley de Little.","limitation":"Teoría general; no aporta parámetros observados de Claro."},
     {"code":"F9","entity":"Massachusetts Institute of Technology","title":"Data Networks Queueing Theory","url":"https://web.mit.edu/dimitrib/www/Queueing_Data_Nets.pdf","citation":"Massachusetts Institute of Technology. (s. f.). Data Networks Queueing Theory.","extracted":"Teoría de colas y fórmulas de espera.","operation":"Fundamento de Erlang C y métricas estacionarias.","limitation":"Teoría general; no valida Poisson, exponencial o FCFS para este grupo."}
   ],
+  "pert": {
+    "project": "Implementación de Módulo Avanzado PQR para Claro Colombia",
+    "unit": "semanas",
+    "target": "",
+    "activities": [
+      {
+        "codigo": "A",
+        "nombre": "Análisis de datos CRC",
+        "predecesoras": "",
+        "a": "1",
+        "m": "2",
+        "b": "3"
+      },
+      {
+        "codigo": "B",
+        "nombre": "Definición de umbrales",
+        "predecesoras": "A",
+        "a": "1",
+        "m": "3",
+        "b": "5"
+      },
+      {
+        "codigo": "C",
+        "nombre": "Diseño de arquitectura de red",
+        "predecesoras": "A",
+        "a": "3",
+        "m": "4",
+        "b": "5"
+      },
+      {
+        "codigo": "D",
+        "nombre": "Algoritmo de asignación FCFS",
+        "predecesoras": "C",
+        "a": "2",
+        "m": "3",
+        "b": "4"
+      },
+      {
+        "codigo": "E",
+        "nombre": "Integración del motor Bayes",
+        "predecesoras": "B, D",
+        "a": "4",
+        "m": "5",
+        "b": "6"
+      },
+      {
+        "codigo": "F",
+        "nombre": "Pruebas de estrés",
+        "predecesoras": "E",
+        "a": "2",
+        "m": "3",
+        "b": "4"
+      },
+      {
+        "codigo": "G",
+        "nombre": "Capacitación de asesores",
+        "predecesoras": "E",
+        "a": "1",
+        "m": "2",
+        "b": "3"
+      },
+      {
+        "codigo": "H",
+        "nombre": "Ajuste de métricas competitivas",
+        "predecesoras": "E",
+        "a": "1",
+        "m": "1",
+        "b": "1"
+      },
+      {
+        "codigo": "I",
+        "nombre": "Despliegue piloto en franjas",
+        "predecesoras": "F, G, H",
+        "a": "3",
+        "m": "4",
+        "b": "5"
+      },
+      {
+        "codigo": "J",
+        "nombre": "Auditoría final de portabilidad",
+        "predecesoras": "I",
+        "a": "1",
+        "m": "2",
+        "b": "3"
+      }
+    ]
+  },
   "decisions": {
     "mode": "parameters",
     "names": [
