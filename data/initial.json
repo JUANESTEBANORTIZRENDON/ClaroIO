@@ -30,6 +30,38 @@
     "project": "Implementación de Módulo Avanzado PQR para Claro Colombia",
     "unit": "semanas",
     "target": "",
+    "sources": [
+      {
+        "code": "P1",
+        "kind": "assumption",
+        "entity": "Material académico del curso de Investigación de Operaciones",
+        "title": "Guía de estudio PERT y CPM",
+        "citation": "Guía de estudio PERT y CPM suministrada como material académico del curso. Autoría, institución y fecha no verificadas en el archivo recibido; no se registran hasta que consten en él.",
+        "extracted": "Enunciado del ejercicio de programación del proyecto PQR y procedimiento PERT/CPM: tiempo esperado, recorridos hacia adelante y hacia atrás, holguras y ruta crítica.",
+        "operation": "Base conceptual del motor de cálculo del módulo y de las explicaciones didácticas.",
+        "limitation": "Material de clase: no es una fuente institucional de Claro ni aporta datos observados."
+      },
+      {
+        "code": "P2",
+        "kind": "assumption",
+        "entity": "Material académico del curso de Investigación de Operaciones",
+        "title": "Diagrama AON del proyecto PQR",
+        "citation": "Diagrama AON suministrado como referencia visual del ejercicio. Autoría y fecha no verificadas en el archivo recibido.",
+        "extracted": "Estructura de la red de actividades y formato de nodo (ES | EF, actividad, LS | LF).",
+        "operation": "Referencia visual: el diagrama de esta aplicación se genera dinámicamente en SVG a partir de los datos editables, no es una imagen fija.",
+        "limitation": "Referencia visual de un ejercicio; no representa un proyecto real."
+      },
+      {
+        "code": "P3",
+        "kind": "assumption",
+        "entity": "Supuestos académicos del ejercicio",
+        "title": "Datos del ejemplo: actividades, dependencias y duraciones",
+        "citation": "Actividades A–J, predecesoras y tiempos a, m y b del proyecto Implementación de Módulo Avanzado PQR para Claro Colombia, definidos para estudiar PERT y CPM.",
+        "extracted": "Diez actividades con tiempos optimista, más probable y pesimista en semanas.",
+        "operation": "Entrada precargada del módulo; el ejemplo produce 23 semanas y la ruta crítica A → C → D → E → F → I → J.",
+        "limitation": "Supuestos académicos: no provienen de Claro Colombia ni representan un proyecto oficial o decisiones reales del operador."
+      }
+    ],
     "activities": [
       {
         "codigo": "A",
