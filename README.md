@@ -100,14 +100,14 @@ Las pruebas de cálculo y API se ejecutan con:
 python -m pytest -q
 ```
 
-El conjunto actual contiene 38 pruebas. Con el servidor ejecutándose y Playwright instalado, la revisión de interfaz se ejecuta con:
+El conjunto actual contiene 39 pruebas de pytest; una de ellas ejecuta las 54 pruebas JavaScript del motor y el diagrama PERT/CPM (requiere Node.js; se omite si no está instalado). Esas pruebas también se corren directamente con `node --test "tests/js/*.test.mjs"`. Con el servidor ejecutándose y Playwright instalado, la revisión de interfaz se ejecuta con:
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
 python scripts/browser_check.py
 ```
 
-La revisión cubre escritorio, móvil, edición de escenarios, navegación, gráficas, CSV de colas, validaciones y ausencia de errores JavaScript.
+La revisión cubre escritorio, móvil, edición de escenarios, navegación, gráficas, CSV de colas, módulo PERT y CPM, validaciones y ausencia de errores JavaScript.
 
 ## Fuentes de datos
 
