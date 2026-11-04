@@ -1,6 +1,6 @@
 # Claro Laboratorio IO
 
-Aplicación académica de Investigación de Operaciones aplicada a Claro Colombia. Integra modelos de teoría de decisiones, teoría de juegos frente a Tigo y teoría de colas M/M/c en una interfaz web interactiva, con cálculos reproducibles, gráficas dinámicas y trazabilidad de los datos utilizados.
+Aplicación académica de Investigación de Operaciones aplicada a Claro Colombia. Integra modelos de teoría de decisiones, teoría de juegos frente a Tigo, teoría de colas M/M/c y programación de proyectos con PERT y CPM en una interfaz web interactiva, con cálculos reproducibles, gráficas dinámicas y trazabilidad de los datos utilizados.
 
 ## Descripción
 
@@ -22,6 +22,7 @@ Los resultados tienen finalidad académica. Las estrategias proxy, clasificacion
 - Laboratorio M/M/c con Erlang C, nivel de servicio, sensibilidad para c=2…5 y rechazo de escenarios sin estado estable.
 - Carga local de CSV de quejas, filtro fijo Claro/Telefonía móvil/Línea Telefónica, agregación mensual, cuantiles lineales y bitácora de cobertura.
 - Exportación JSON de parámetros, operaciones, resultados, filtros, etiquetas, advertencias y fuentes de la ejecución de colas.
+- Módulo PERT y CPM (`#pert-cpm`) del proyecto académico «Implementación de Módulo Avanzado PQR»: tiempo esperado TE = (a + 4m + b) / 6, orden topológico, recorridos hacia adelante y hacia atrás, holguras con tolerancia decimal, una o varias rutas críticas, probabilidad PERT opcional con aproximación normal y diagrama de red AON dinámico en SVG. Se calcula íntegramente en el navegador; el ejemplo precargado dura 23 semanas con ruta crítica A → C → D → E → F → I → J.
 - Trazabilidad de los trimestres, grupos observados y supuestos de clasificación.
 - Referencias institucionales externas, catálogo de colas F1–F9 y metodología reproducible.
 
@@ -33,6 +34,7 @@ Los resultados tienen finalidad académica. Las estrategias proxy, clasificacion
 - HTML, CSS y JavaScript en el frontend.
 - Chart.js 4.4.8, distribuido localmente en `app/static/vendor/chart.umd.js`, para las gráficas.
 - Pytest, HTTPX y Starlette TestClient para las pruebas.
+- Node.js 20 o superior (opcional) para las pruebas del motor PERT/CPM con `node:test`; no se agregan dependencias npm ni hay paso de build de frontend.
 - Playwright para la validación automatizada del navegador.
 
 ## Estructura del proyecto
@@ -45,9 +47,12 @@ ClaroIO/
 │   ├── routes.py            # Endpoints de la API
 │   ├── services.py          # Cálculos de decisiones, juegos, M/M/c y adaptación CSV
 │   └── static/              # HTML, CSS, JavaScript y Chart.js
+│       ├── pert-engine.js   # Motor PERT/CPM (funciones puras, sin DOM)
+│       ├── pert-diagram.js  # Diagrama AON en SVG (layout y renderizado)
+│       └── pert.js          # Interfaz del módulo PERT y CPM
 ├── data/initial.json        # Datos procesados y valores iniciales
 ├── scripts/browser_check.py # Pruebas de interfaz con Playwright
-├── tests/                   # Pruebas unitarias y de API
+├── tests/                   # Pruebas unitarias y de API (tests/js: motor y diagrama PERT/CPM)
 ├── render.yaml              # Configuración de despliegue en Render
 ├── requirements.txt         # Dependencias de ejecución
 └── requirements-dev.txt     # Dependencias para pruebas y desarrollo
