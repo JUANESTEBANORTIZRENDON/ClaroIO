@@ -276,3 +276,60 @@ test('con varias rutas críticas se usa la de mayor varianza', () => {
   assert.deepEqual(path, ['A', 'C', 'D']);
   near(v, (4 / 6) ** 2);
 });
+
+test('regresión: tolerancia relativa con magnitudes grandes conserva la ruta crítica', () => {
+  let seed = 7;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let trial = 0; trial < 200; trial++) {
+    const rows = Array.from({ length: 8 }, (_, i) => {
+      const a = rand() * 1e6, m = a + rand() * 1e6, b = m + rand() * 1e6;
+      return act(`T${i}`, i ? [`T${i - 1}`] : [], a, m, b);
+    });
+    const result = calculateProject(rows);
+    assert.equal(result.ok, true);
+    assert.equal(result.criticalPaths.length, 1, `intento ${trial}`);
+    assert.doesNotThrow(() => completionProbability(result, result.duration));
+  }
+});
+
+test('regresión: más de 500 rutas críticas no sesga la varianza ni el truncamiento se oculta', () => {
+  const rows = Array.from({ length: 500 }, (_, i) => act(`P${i}`, [], 5));
+  rows.push(act('Z', [], 0, 5, 10));
+  const result = calculateProject(rows);
+  assert.equal(result.pathsTruncated, true);
+  assert.equal(result.criticalPaths.length, 500);
+  near(projectVariance(result).variance, (10 / 6) ** 2);
+  assert.deepEqual(projectVariance(result).path, ['Z']);
+  near(completionProbability(result, 5).probability, 0.5);
+});
+
+test('regresión: cadena larga no desborda la pila', () => {
+  const rows = Array.from({ length: 12000 }, (_, i) => act(`N${i}`, i ? [`N${i - 1}`] : [], 1));
+  const result = calculateProject(rows);
+  assert.equal(result.ok, true);
+  near(result.duration, 12000);
+  assert.equal(result.mainPath.length, 12000);
+});
+
+test('regresión: códigos reservados como separador y valores enormes se bloquean', () => {
+  for (const codigo of ['-', '—', 'A,B', ';']) {
+    const result = calculateProject([act(codigo, [], 1)]);
+    assert.equal(result.ok, false, codigo);
+    assert.equal(result.errors[0].field, 'codigo');
+  }
+  const huge = validateActivities([act('A', [], 1e308)]);
+  assert.deepEqual(huge.errors.map(e => e.field), ['a', 'm', 'b']);
+  assert.match(huge.errors[0].message, /demasiado grande/);
+});
+
+test('regresión: códigos equivalentes en Unicode o con caracteres de ancho cero se tratan como duplicados', () => {
+  assert.equal(normalizeCode('é'), normalizeCode('é'));
+  assert.equal(normalizeCode('A​'), 'A');
+  const result = validateActivities([act('é', [], 1), act('é', [], 1)]);
+  assert.deepEqual(result.errors.filter(e => e.field === 'codigo').map(e => e.row), [0, 1]);
+});
+
+test('el error de ciclo informa las filas implicadas', () => {
+  const result = validateActivities([act('A', ['C'], 1), act('B', ['A'], 1), act('C', ['B'], 1), act('D', [], 1)]);
+  assert.deepEqual(result.errors[0].rows.sort(), [0, 1, 2]);
+});

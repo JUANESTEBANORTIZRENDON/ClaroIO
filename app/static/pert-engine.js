@@ -3,10 +3,9 @@
 export const EPSILON = 1e-9;
 export const MAX_CRITICAL_PATHS = 500;
 
-const clean = value => Math.abs(value) < EPSILON ? 0 : value;
-const close = (x, y) => Math.abs(x - y) < EPSILON;
+export const MAX_TIME = 1e9;
 
-export const normalizeCode = value => String(value ?? '').trim().toUpperCase();
+export const normalizeCode = value => String(value ?? '').replace(/[​-‍﻿]/g, '').normalize('NFC').trim().toUpperCase();
 
 /** Convierte "b, D" o "B;d" en ['B','D']. Conserva repetidos para que la validación los informe. */
 export function parsePredecessors(text) {
@@ -24,6 +23,7 @@ export function parseDecimal(value) {
 export const expectedTime = (a, m, b) => (a + 4 * m + b) / 6;
 export const variance = (a, b) => ((b - a) / 6) ** 2;
 
+const DASHES = /^[-–—]+$/;
 const FIELD_LABEL = { a: 'a (optimista)', m: 'm (más probable)', b: 'b (pesimista)' };
 
 /**
@@ -47,6 +47,7 @@ export function validateActivities(activities) {
 
   rows.forEach((row, index) => {
     if (!row.codigo) add(index, 'codigo', 'El código no puede estar vacío.');
+    else if (DASHES.test(row.codigo) || /[,;]/.test(row.codigo)) add(index, 'codigo', `El código ${row.codigo} no es válido: no puede ser solo guiones ni contener comas o punto y coma, porque se usan para separar predecesoras.`);
     else if (counts.get(row.codigo) > 1) add(index, 'codigo', `El código ${row.codigo} está repetido; cada actividad necesita uno único.`);
 
     const numericOk = {};
@@ -54,6 +55,7 @@ export function validateActivities(activities) {
       const value = row[field];
       if (typeof value !== 'number' || !Number.isFinite(value)) add(index, field, `${FIELD_LABEL[field]} debe ser un número finito.`);
       else if (value < 0) add(index, field, `${FIELD_LABEL[field]} no puede ser negativo.`);
+      else if (value > MAX_TIME) add(index, field, `${FIELD_LABEL[field]} es demasiado grande (máximo ${MAX_TIME.toExponential(0)}).`);
       else numericOk[field] = true;
     }
     if (numericOk.a && numericOk.m && row.a > row.m) add(index, 'm', `Se requiere a ≤ m: el tiempo más probable (${row.m}) no puede ser menor que el optimista (${row.a}).`);
@@ -70,7 +72,7 @@ export function validateActivities(activities) {
 
   if (!errors.length) {
     const { cycle } = topologicalOrder(rows);
-    if (cycle) add(null, 'predecesoras', `Existe una dependencia cíclica: ${cycle.join(' → ')}. Una actividad no puede depender, directa o indirectamente, de sí misma.`);
+    if (cycle) errors.push({ row: null, field: 'predecesoras', rows: [...new Set(cycle)].map(code => rows.findIndex(r => r.codigo === code)), message: `Existe una dependencia cíclica: ${cycle.join(' → ')}. Una actividad no puede depender, directa o indirectamente, de sí misma.` });
   }
   return { valid: errors.length === 0, errors };
 }
@@ -125,15 +127,20 @@ function enumerateCriticalPaths(byCode, criticalEdges, rowOrder) {
   for (const list of next.values()) list.sort((x, y) => rowOrder.get(x) - rowOrder.get(y));
   const starts = [...byCode.values()].filter(a => a.esCritica && a.predecesoras.length === 0).map(a => a.codigo);
   const paths = [];
-  let truncated = false;
-  const walk = trail => {
-    if (paths.length >= MAX_CRITICAL_PATHS) { truncated = true; return; }
-    const successors = next.get(trail.at(-1)) ?? [];
-    if (!successors.length) { paths.push([...trail]); return; }
-    for (const code of successors) walk([...trail, code]);
-  };
-  for (const start of starts) walk([start]);
-  return { paths, truncated };
+  // DFS iterativo con pila explícita: no depende de la profundidad de la pila de llamadas.
+  for (const start of starts) {
+    const trail = [start], cursor = [0];
+    while (trail.length) {
+      const successors = next.get(trail.at(-1)) ?? [];
+      if (!successors.length && cursor.at(-1) === 0) {
+        if (paths.length >= MAX_CRITICAL_PATHS) return { paths, truncated: true };
+        paths.push([...trail]);
+      }
+      if (cursor.at(-1) < successors.length) { trail.push(successors[cursor[cursor.length - 1]++]); cursor.push(0); }
+      else { trail.pop(); cursor.pop(); }
+    }
+  }
+  return { paths, truncated: false };
 }
 
 /**
@@ -162,6 +169,10 @@ export function calculateProject(input) {
     activity.ef = activity.es + activity.te;
   }
   const duration = Math.max(...activities.map(activity => activity.ef));
+  // Tolerancia relativa a la magnitud del proyecto: con duraciones grandes el error de redondeo supera 1e-9 absoluto.
+  const tolerance = EPSILON * Math.max(1, Math.abs(duration));
+  const clean = value => Math.abs(value) < tolerance ? 0 : value;
+  const close = (x, y) => Math.abs(x - y) < tolerance;
 
   for (const code of [...order].reverse()) {        // recorrido hacia atrás
     const activity = byCode.get(code);
@@ -202,8 +213,25 @@ export function normalCdf(z) {
 export function projectVariance(result) {
   const byCode = new Map(result.activities.map(activity => [activity.codigo, activity]));
   const perPath = result.criticalPaths.map(path => ({ path, variance: path.reduce((sum, code) => sum + byCode.get(code).varianza, 0) }));
-  const governing = perPath.reduce((best, item) => item.variance > best.variance + EPSILON ? item : best, perPath[0]);
-  return { perPath, variance: governing.variance, sigma: Math.sqrt(governing.variance), path: governing.path };
+  // Programación dinámica sobre el subgrafo crítico: no depende de cuántas rutas se enumeraron (tope MAX_CRITICAL_PATHS).
+  const incoming = new Map();
+  for (const [from, to] of result.criticalEdges) (incoming.get(to) ?? incoming.set(to, []).get(to)).push(from);
+  const best = new Map(), via = new Map();
+  for (const code of result.order) {
+    if (!byCode.get(code).esCritica) continue;
+    let top = 0, from = null;
+    for (const previous of incoming.get(code) ?? []) if (from === null || best.get(previous) > top + EPSILON) { top = best.get(previous); from = previous; }
+    best.set(code, byCode.get(code).varianza + top);
+    via.set(code, from);
+  }
+  const hasOutgoing = new Set(result.criticalEdges.map(([from]) => from));
+  let end = null;
+  for (const code of result.order) if (best.has(code) && !hasOutgoing.has(code) && (end === null || best.get(code) > best.get(end) + EPSILON)) end = code;
+  if (end === null) return { perPath, variance: 0, sigma: 0, path: [] };
+  const path = [];
+  for (let code = end; code !== null; code = via.get(code)) path.unshift(code);
+  const total = best.get(end);
+  return { perPath, variance: total, sigma: Math.sqrt(total), path };
 }
 
 /** P(T ≤ plazo) con aproximación normal sobre la ruta crítica de mayor varianza. */

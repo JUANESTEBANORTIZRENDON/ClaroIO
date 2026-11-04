@@ -132,7 +132,11 @@ function refreshPert(){
 function onPertInput(input){
  const field=input.dataset.pertField;
  if(field==='target')state.pert.target=input.value;else{const row=state.pert.activities[Number(input.dataset.pertRow)];if(!row)return;row[field]=input.value;}
+ if(pertPending&&(field==='codigo'||field==='predecesoras')){pertPending=null;$('pert-notice').innerHTML='';}
  save();clearTimeout(timer);timer=setTimeout(refreshPert,180);
+}
+function focusPertAfterDelete(index){
+ const rows=state.pert.activities,target=rows.length?document.querySelector(`[data-pert-row="${Math.min(index,rows.length-1)}"][data-pert-field="codigo"]`):document.querySelector('[data-pert-action="add"]');target?.focus();
 }
 function onPertAction(button){
  const action=button.dataset.pertAction,index=Number(button.dataset.pertRow),rows=state.pert.activities,notice=$('pert-notice');
@@ -150,19 +154,20 @@ function onPertAction(button){
  if(action==='delete'){
   const dependents=pertDependents(state.pert,index);
   if(dependents.length){pertPending={index};notice.innerHTML=pertDeleteNotice(state.pert,index,dependents);notice.querySelector('[data-pert-action="cancel-delete"]')?.focus();return;}
-  rows.splice(index,1);pertPending=null;save();renderPage(false);toast('Actividad eliminada.');return;
+  rows.splice(index,1);pertPending=null;save();renderPage(false);toast('Actividad eliminada.');focusPertAfterDelete(index);return;
  }
  if(action==='confirm-delete'){
   if(!pertPending||pertPending.index!==index||!rows[index])return;
   const code=normalizeCode(rows[index].codigo),touched=pertDependents(state.pert,index);
   for(const {index:i} of touched)rows[i].predecesoras=parsePredecessors(rows[i].predecesoras).filter(c=>c!==code).join(', ');
   rows.splice(index,1);pertPending=null;save();renderPage(false);
-  toast(`${code} eliminada y quitada de las predecesoras de ${touched.map(t=>t.code).join(', ')}.`);return;
+  toast(`${code} eliminada y quitada de las predecesoras de ${touched.map(t=>t.code).join(', ')}.`);focusPertAfterDelete(index);return;
  }
  if(action==='cancel-delete'){pertPending=null;notice.innerHTML='';return;}
  if(action==='example'||action==='reset'){
   state.pert=freshPert();pertPending=null;save();renderPage(false);
   toast(action==='example'?'Se cargó el ejemplo de Claro (módulo PERT y CPM).':'Se restauraron los valores originales de PERT y CPM.');
+  document.querySelector(`[data-pert-action="${action}"]`)?.focus();
  }
 }
 function navigate(next){if(!labels[next])return;page=next;renderPage();}
